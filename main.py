@@ -4,7 +4,9 @@ from pathlib import Path
 
 @click.command()
 @click.argument('name')
-def create_app(name):
+@click.option("--db",default=None,help = "Includes the db setup")
+@click.option("--backend",is_flag=True,help="Creates backend")
+def create_app(name,db,backend):
     # create a Path object from name
     folder = Path(name)
 
@@ -29,7 +31,13 @@ if __name__ == "__main__":
         f"Created project that .."
     )
     click.echo(f"Created the file:{name} succesfully")
+    
+    if db == "go":
+        pass
+
 
 if __name__ == '__main__':
     create_app()
+
+
 
