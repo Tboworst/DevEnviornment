@@ -105,19 +105,24 @@ def create_app(name):
         "HTML":   (others.generate_html,   "index.html"),
     }
 
-    # Create the project folder
+    # Create the project folder and subfolders
     folder.mkdir()
+    backend_folder = folder / "backend"
+    backend_folder.mkdir()
 
-    # Loop through database selections and write each db file
-    for db in database:
-        db_content = databas[db]()
-        (folder / f"{db.lower()}.{ext}").write_text(db_content)
+    # Write the main backend file inside backend/
+    (backend_folder / f"main.{ext}").write_text(content)
 
-    # Write the main backend file
-    (folder / f"main.{ext}").write_text(content)
+    # Write database files inside db/ — only create the folder if a db was selected
+    if database:
+        db_folder = folder / "db"
+        db_folder.mkdir()
+        for db in database:
+            db_content = databas[db]()
+            (db_folder / f"{db.lower()}.{ext}").write_text(db_content)
 
     # Write the README with project details
-    (folder / "README.md").write_text(others.generate_readme(name, backend, database))
+    (folder / "README.md").write_text(others.generate_readme(name, backend, ext, database))
 
     # Write the .gitignore for the selected language
     (folder / ".gitignore").write_text(gitignores[backend]())
@@ -137,17 +142,25 @@ def create_app(name):
         (frontend_folder / filename).write_text(generator_fn())
 
     # Print a summary of everything that was created
-    db_files = [f"  {db.lower()}.{ext}" for db in database]
-    db_summary = "\n".join(db_files)
+    summary_lines = [
+        f"  backend/main.{ext}",
+    ]
+    if database:
+        for db in database:
+            summary_lines.append(f"  db/{db.lower()}.{ext}")
+    if frontend != "None":
+        _, filename = frontends[frontend]
+        summary_lines.append(f"  frontend/{filename}")
+    summary_lines += [
+        "  README.md",
+        "  .gitignore",
+        f"  {deps_file}",
+        "  Dockerfile",
+    ]
 
-    click.echo(f"""
-Created: {name}/
-  main.{ext}
-{db_summary}
-  README.md
-  .gitignore
-  {deps_file}
-    """)
+    click.echo(f"\nCreated: {name}/")
+    for line in summary_lines:
+        click.echo(line)
 
 
 

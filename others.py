@@ -1,4 +1,4 @@
-def generate_readme(name, backend, database):
+def generate_readme(name, backend, ext, database):
     # Join the list of selected databases into a readable string e.g. "Postgres, Sqlite"
     db_list = ", ".join(database) if database else "None"
 
@@ -10,10 +10,10 @@ Databases: {db_list}
 
 ## Getting Started
 1. Navigate into the project folder: `cd {name}`
-2. Open `main.{backend}` to start coding
+2. Open `main.{ext}` to start coding
 
 ## Files
-- `main.{backend}` — entry point for your {backend} backend
+- `main.{ext}` — entry point for your {backend} backend
 - `README.md` — this file
 
 ## License

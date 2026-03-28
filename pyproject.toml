@@ -5,7 +5,7 @@ build-backend = "setuptools.backends.legacy:build"
 [project]
 name = "create-app"
 version = "0.1.0"
-dependencies = ["click"]
+dependencies = ["click", "InquirerPy"]
 
 [project.scripts]
 create-app = "main:create_app"
