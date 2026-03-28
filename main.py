@@ -3,6 +3,7 @@ import click
 from pathlib import Path
 import languages
 import databases
+import others
 
 @click.command()
 @click.argument("name")
@@ -59,22 +60,63 @@ def create_app(name):
 
     
 
+    # Map each language to its gitignore generator
+    gitignores = {
+        "go": others.generate_gitignore_go,
+        "java": others.generate_gitignore_java,
+        "ts": others.generate_gitignore_ts,
+        "python": others.generate_gitignore_python,
+    }
+
+    # Map each language to its dependencies file generator
+    deps_generators = {
+        "go": others.generate_deps_go,
+        "java": others.generate_deps_java,
+        "ts": others.generate_deps_ts,
+        "python": others.generate_deps_python,
+    }
+
+    # Map each language to its dependencies filename
+    deps_filenames = {
+        "go": "go.mod",
+        "java": "pom.xml",
+        "ts": "package.json",
+        "python": "requirements.txt",
+    }
+
     # Create the project folder
     folder.mkdir()
 
-    #Loop through datababase quetionare 
+    # Loop through database selections and write each db file
     for db in database:
         db_content = databas[db]()
-        (folder/ f"{db.lower()}.{ext}").write_text(db_content)
+        (folder / f"{db.lower()}.{ext}").write_text(db_content)
 
-    # Write the generated code into a file with the correct extension
+    # Write the main backend file
     (folder / f"main.{ext}").write_text(content)
 
-    (folder / "README.md").write_text(
-        f"# {name}\nCreated with  {backend}"
-    )
+    # Write the README with project details
+    (folder / "README.md").write_text(others.generate_readme(name, backend, database))
 
-    click.echo(f"Created project: {name} with {backend} backend")
+    # Write the .gitignore for the selected language
+    (folder / ".gitignore").write_text(gitignores[backend]())
+
+    # Write the dependencies file (requirements.txt, go.mod, package.json, pom.xml)
+    deps_file = deps_filenames[backend]
+    (folder / deps_file).write_text(deps_generators[backend]())
+
+    # Print a summary of everything that was created
+    db_files = [f"  {db.lower()}.{ext}" for db in database]
+    db_summary = "\n".join(db_files)
+
+    click.echo(f"""
+Created: {name}/
+  main.{ext}
+{db_summary}
+  README.md
+  .gitignore
+  {deps_file}
+    """)
 
 
 

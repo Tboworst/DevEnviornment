@@ -1,4 +1,3 @@
-
 def generate_postgres():
     return """  
     import psycopg2
