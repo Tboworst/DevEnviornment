@@ -4,13 +4,13 @@ from pathlib import Path
 import languages
 import databases
 
-
-
-def create_app(name, backend):
+@click.command()
+@click.argument("name")
+def create_app(name):
     # Build the folder path from the project name the user gave
     backend = inquirer.select(
         message= "Select a backend language:",
-        choices=["go","python","java","Typescript"]
+        choices=["go","python","java","ts"]
     ).execute()
     
     
@@ -34,7 +34,7 @@ def create_app(name, backend):
     }
 
     databas = {
-        "PostGres": databases.generate_postgres,
+        "Postgres": databases.generate_postgres,
         "Sqlite" : databases.generate_Sqlite
     }
 
@@ -61,6 +61,11 @@ def create_app(name, backend):
 
     # Create the project folder
     folder.mkdir()
+
+    #Loop through datababase quetionare 
+    for db in database:
+        db_content = databas[db]()
+        (folder/ f"{db.lower()}.{ext}").write_text(db_content)
 
     # Write the generated code into a file with the correct extension
     (folder / f"main.{ext}").write_text(content)
