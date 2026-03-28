@@ -4,16 +4,21 @@ from pathlib import Path
 import languages
 import databases
 import others
+import dockergeneration
 
 @click.command()
 @click.argument("name")
 def create_app(name):
     # Build the folder path from the project name the user gave
     backend = inquirer.select(
-        message= "Select a backend language:",
-        choices=["go","python","java","ts"]
+        message="Select a backend language:",
+        choices=["go", "python", "java", "ts"]
     ).execute()
-    
+
+    frontend = inquirer.select(
+        message="Select a frontend framework (or None to skip):",
+        choices=["None", "React", "Vue", "Svelte", "HTML"]
+    ).execute()
     
     database = inquirer.checkbox(
         message= "Select your database:",
@@ -76,12 +81,28 @@ def create_app(name):
         "python": others.generate_deps_python,
     }
 
+    # Map each language to its Dockerfile generator — now using dockergeneration.py
+    dockerfiles = {
+        "go": dockergeneration.generate_dockerfile_go,
+        "java": dockergeneration.generate_dockerfile_java,
+        "ts": dockergeneration.generate_dockerfile_ts,
+        "python": dockergeneration.generate_dockerfile_python,
+    }
+
     # Map each language to its dependencies filename
     deps_filenames = {
         "go": "go.mod",
         "java": "pom.xml",
         "ts": "package.json",
         "python": "requirements.txt",
+    }
+
+    # Maps each frontend choice to its generator function and output filename
+    frontends = {
+        "React":  (others.generate_react,  "App.jsx"),
+        "Vue":    (others.generate_vue,    "App.vue"),
+        "Svelte": (others.generate_svelte, "App.svelte"),
+        "HTML":   (others.generate_html,   "index.html"),
     }
 
     # Create the project folder
@@ -101,9 +122,19 @@ def create_app(name):
     # Write the .gitignore for the selected language
     (folder / ".gitignore").write_text(gitignores[backend]())
 
-    # Write the dependencies file (requirements.txt, go.mod, package.json, pom.xml)
+    # Write the dependencies file — pass name so module/package name matches the project
     deps_file = deps_filenames[backend]
-    (folder / deps_file).write_text(deps_generators[backend]())
+    (folder / deps_file).write_text(deps_generators[backend](name))
+
+    # Write the Dockerfile — pass name so the binary/jar name matches the project
+    (folder / "Dockerfile").write_text(dockerfiles[backend](name))
+
+    # If the user picked a frontend, create a frontend/ subfolder and write the file
+    if frontend != "None":
+        frontend_folder = folder / "frontend"
+        frontend_folder.mkdir()
+        generator_fn, filename = frontends[frontend]
+        (frontend_folder / filename).write_text(generator_fn())
 
     # Print a summary of everything that was created
     db_files = [f"  {db.lower()}.{ext}" for db in database]

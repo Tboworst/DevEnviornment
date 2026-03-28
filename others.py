@@ -65,33 +65,99 @@ dist/
 # Each dependencies function returns the starter file for managing packages.
 # This gives the project a foundation to add libraries later.
 
-def generate_deps_python():
+def generate_deps_python(name):
     return """# Add your dependencies here, one per line
 # Example: requests==2.31.0
 """
 
-def generate_deps_go():
-    return """module myapp
+def generate_deps_go(name):
+    # module name matches the project name the user gave
+    return f"""module {name}
 
 go 1.21
 """
 
-def generate_deps_java():
-    return """<project>
+def generate_deps_java(name):
+    # artifactId matches the project name the user gave
+    return f"""<project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.example</groupId>
-  <artifactId>myapp</artifactId>
+  <artifactId>{name}</artifactId>
   <version>1.0</version>
 </project>
 """
 
-def generate_deps_ts():
-    return """{
-  "name": "myapp",
+def generate_deps_ts(name):
+    # name field matches the project name the user gave
+    return f"""{{
+  "name": "{name}",
   "version": "1.0.0",
-  "scripts": {
+  "scripts": {{
     "start": "ts-node main.ts"
-  },
-  "dependencies": {}
+  }},
+  "dependencies": {{}}
+}}
+"""
+
+
+def generate_react():
+    # A minimal React component — the entry point of a React app
+    return """import React from 'react';
+
+function App() {
+  return (
+    <div>
+      <h1>Hello from React</h1>
+    </div>
+  );
 }
+
+export default App;
+"""
+
+def generate_vue():
+    # A Vue single file component — template, script, and style in one file
+    return """<template>
+  <div>
+    <h1>Hello from Vue</h1>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'App'
+}
+</script>
+
+<style>
+</style>
+"""
+
+def generate_svelte():
+    # A Svelte component — simpler syntax, no boilerplate needed
+    return """<script>
+  let message = "Hello from Svelte";
+</script>
+
+<main>
+  <h1>{message}</h1>
+</main>
+
+<style>
+</style>
+"""
+
+def generate_html():
+    # Plain HTML starter — no framework, just a basic page
+    return """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My App</title>
+</head>
+<body>
+  <h1>Hello, world!</h1>
+</body>
+</html>
 """
